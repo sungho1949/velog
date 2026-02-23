@@ -1,0 +1,30 @@
+services:
+  # MySQL 컨테이너 설정
+  velog-mysql:
+    image: mysql:8.0
+    container_name: velog-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: velog
+      MYSQL_ROOT_PASSWORD: 1949
+      TZ: Asia/Seoul
+    volumes:
+      - ./docker/mysql/data:/var/lib/mysql
+    networks:
+      - velog-network
+
+  # Redis 컨테이너 설정
+  velog-redis:
+    image: redis:latest
+    container_name: velog-redis
+    ports:
+      - "6379:6379"
+    environment:
+      TZ: Asia/Seoul
+    networks:
+      - velog-network
+
+networks:
+  velog-network:
+    driver: bridge

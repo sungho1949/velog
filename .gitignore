@@ -38,3 +38,6 @@ out/
 
 ### Environment ###
 .env
+
+### Docker MySQL data ###
+docker/mysql/data/
