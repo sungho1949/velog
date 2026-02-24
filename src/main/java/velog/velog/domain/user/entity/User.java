@@ -32,4 +32,8 @@ public class User extends UserBaseEntity {
 
     @Builder.Default
     private boolean isVerified = false; // 이메일 인증 여부
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
 }

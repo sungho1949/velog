@@ -5,7 +5,7 @@ import velog.velog.domain.user.entity.User;
 
 import java.util.Optional;
 
-public interface UserRepositroy extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long> {
 
     // 이메일 중복 확인
     boolean existsByEmail(String email);
