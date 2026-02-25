@@ -33,6 +33,15 @@ public class User extends UserBaseEntity {
     @Builder.Default
     private boolean isVerified = false; // 이메일 인증 여부
 
+    public void updateInfo(String lastName, String firstName) {
+        if(lastName != null && !lastName.isBlank()) {
+            this.lastName = lastName;
+        }
+
+        if (firstName != null && !firstName.isBlank()) {
+            this.firstName = firstName;
+        }
+    }
     public void updatePassword(String password) {
         this.password = password;
     }
