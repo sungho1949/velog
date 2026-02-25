@@ -21,4 +21,10 @@ public class UserDto {
                     .build();
         }
     }
+
+    @Getter @Builder @AllArgsConstructor @NoArgsConstructor
+    public static class UpdateRequest {
+        private String lastName;
+        private String firstName;
+    }
 }
