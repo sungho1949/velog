@@ -14,6 +14,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import tools.jackson.databind.ObjectMapper;
 import velog.velog.system.security.jwt.config.JwtAuthenticationFilter;
 import velog.velog.system.security.jwt.util.JwtTokenProvider;
 import velog.velog.system.security.util.CookieUtils;
@@ -28,6 +29,7 @@ public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
     private final StringRedisTemplate redisTemplate;
     private final CookieUtils cookieUtils;
+    private final ObjectMapper objectMapper;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -46,7 +48,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated() // 그 외 모든 요청 인증 필요 -> 추후 리팩토링
                 )
 
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, redisTemplate, cookieUtils), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, redisTemplate, cookieUtils, objectMapper), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
