@@ -16,6 +16,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import velog.velog.system.security.jwt.config.JwtAuthenticationFilter;
 import velog.velog.system.security.jwt.util.JwtTokenProvider;
+import velog.velog.system.security.util.CookieUtils;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final StringRedisTemplate redisTemplate;
+    private final CookieUtils cookieUtils;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -44,7 +46,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated() // 그 외 모든 요청 인증 필요 -> 추후 리팩토링
                 )
 
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, redisTemplate), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, redisTemplate, cookieUtils), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -58,7 +60,6 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of("http://localhost:3000")); // 프론트 주소
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
-        config.setExposedHeaders(List.of("Authorization")); // 토큰 허용
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

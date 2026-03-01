@@ -1,5 +1,6 @@
 package velog.velog.domain.auth.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -10,20 +11,23 @@ import velog.velog.system.security.jwt.dto.JwtDto;
 public class AuthDto {
     @Builder @AllArgsConstructor @NoArgsConstructor @Getter
     public static class SignUpRequest {
-        @NotBlank(message = "이메일을 입력해주세요.") @Email
+        @NotBlank(message = "이메일을 입력해주세요.")
+        @Email
         private String email;
 
-        @NotBlank(message = "비밀번호를 입력해주세요.") @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,16}$")
+        @NotBlank(message = "비밀번호를 입력해주세요.")
+        @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,16}$")
         private String password;
-
-        @NotBlank(message = "비밀번호를 다시 입력해주세요.")
-        private String passwordCheck;
 
         @NotBlank(message = "성을 입력해주세요.")
         private String lastName;
 
         @NotBlank(message = "이름을 입력해주세요.")
         private String firstName;
+
+        public String getEmail() {
+            return email != null ? email.trim().toLowerCase() : null;
+        }
     }
 
     @Builder @AllArgsConstructor @NoArgsConstructor @Getter
@@ -34,17 +38,19 @@ public class AuthDto {
 
         @NotBlank(message = "비밀번호를 입력해주세요.")
         private String password;
+
+        public String getEmail() {
+            return email != null ? email.trim().toLowerCase() : null;
+        }
     }
 
     @Builder @AllArgsConstructor @NoArgsConstructor @Getter
     public static class LoginResponse {
         private UserDto.UserResponse user;
-        private JwtDto.TokenExpiresInfo tokenExpiresInfo;
 
-        public static LoginResponse of(UserDto.UserResponse user, JwtDto.TokenExpiresInfo tokenExpiresInfo) {
+        public static LoginResponse of(UserDto.UserResponse user) {
             return LoginResponse.builder()
                     .user(user)
-                    .tokenExpiresInfo(tokenExpiresInfo)
                     .build();
         }
     }
@@ -59,8 +65,13 @@ public class AuthDto {
         @Pattern(regexp = "^[0-9]{6}$", message = "인증번호는 6자리 숫자입니다.")
         private String code;
 
-        @NotBlank
+        @NotNull
         private EmailPurpose purpose; // SIGNUP인지 PASSWORD_RESET인지
+
+
+        public String getEmail() {
+            return email != null ? email.trim().toLowerCase() : null;
+        }
     }
 
     @Getter @Builder @AllArgsConstructor @NoArgsConstructor

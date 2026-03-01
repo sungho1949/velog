@@ -30,8 +30,10 @@ public class CookieUtils {
     public void addRefreshTokenCookie(HttpServletResponse response, String token, Duration duration) {
         ResponseCookie cookie = ResponseCookie.from("refreshToken", token)
                 .httpOnly(true)
+                .secure(false)
                 .path("/")
                 .maxAge(duration.getSeconds())
+                .sameSite("Lax")
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
@@ -52,6 +54,15 @@ public class CookieUtils {
         if (request.getCookies() == null) return null;
         return Arrays.stream(request.getCookies())
                 .filter(c -> "accessToken".equals(c.getName()))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public String getRefreshTokenFromRequest(HttpServletRequest request) {
+        if(request.getCookies() == null) return null;
+        return Arrays.stream(request.getCookies())
+                .filter(c -> "refreshToken".equals(c.getName()))
                 .map(Cookie::getValue)
                 .findFirst()
                 .orElse(null);

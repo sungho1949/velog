@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import velog.velog.system.security.model.UserPrincipal;
 
 import java.security.Key;
 import java.util.Collections;
@@ -68,10 +69,8 @@ public class JwtTokenProvider {
     public Authentication getAuthentication(String token) {
         String email = this.getEmail(token);
 
-        UserDetails userDetails = User.builder()
+        UserDetails userDetails = UserPrincipal.builder()
                 .username(email)
-                .password("")
-                .roles("USER")
                 .build();
 
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
