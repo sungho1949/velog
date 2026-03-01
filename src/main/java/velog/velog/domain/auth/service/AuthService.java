@@ -12,6 +12,8 @@ import velog.velog.domain.auth.dto.EmailPurpose;
 import velog.velog.domain.user.dto.UserDto;
 import velog.velog.domain.user.entity.User;
 import velog.velog.domain.user.repository.UserRepository;
+import velog.velog.system.exception.model.ErrorCode;
+import velog.velog.system.exception.model.RestException;
 import velog.velog.system.security.jwt.dto.JwtDto;
 import velog.velog.system.security.jwt.util.JwtTokenProvider;
 import velog.velog.system.security.util.CookieUtils;
@@ -33,7 +35,7 @@ public class AuthService {
 
         // 1. 중복 체크 및 인증 여부 확인
         if(userRepository.existsByEmail(email)) {
-            throw new RuntimeException("이미 존재하는 이메일입니다.");
+            throw new RestException(ErrorCode.AUTH_EMAIL_ALREADY_EXISTS);
         }
         validateEmailVerified(email, EmailPurpose.SIGNUP);
 
@@ -58,11 +60,11 @@ public class AuthService {
 
         // 1. 이메일 존재 확인
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다."));
+                .orElseThrow(() -> new RestException(ErrorCode.AUTH_USER_NOT_FOUND));
 
         // 2. 비밀번호 일치 여부 확인
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+            throw new RestException(ErrorCode.AUTH_PASSWORD_NOT_MATCH);
         }
 
         // 3. 토큰 생성
@@ -109,7 +111,7 @@ public class AuthService {
     @Transactional
     public void delete(String email, HttpServletResponse response) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new RestException(ErrorCode.AUTH_USER_NOT_FOUND));
 
         userRepository.delete(user);
         redisTemplate.delete("RTK:" + email);
@@ -123,7 +125,7 @@ public class AuthService {
         String refreshToken = cookieUtils.getRefreshTokenFromRequest(request);
 
         if(refreshToken == null || !jwtTokenProvider.validateToken(refreshToken)) {
-            throw new RuntimeException("인증 세션이 만료되었습니다. 다시 로그인해주세요.");
+            throw new RestException(ErrorCode.JWT_EXPIRED);
         }
 
         // 2. Token 추출
@@ -132,7 +134,7 @@ public class AuthService {
         // 3. Redis에서 해당 이메일의 RTK 조회
         String savedRefreshToken = redisTemplate.opsForValue().get("RTK:" + email);
         if(savedRefreshToken == null || !savedRefreshToken.equals(refreshToken)) {
-            throw new RuntimeException("유요하지 않은 세션입니다.");
+            throw new RestException(ErrorCode.JWT_INVALID);
         }
 
         // 4. 새로운 토큰 생성
@@ -146,7 +148,7 @@ public class AuthService {
 
         // 6. 유저 정보 조회 및 응답 반환
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new RestException(ErrorCode.AUTH_USER_NOT_FOUND));
 
         return AuthDto.LoginResponse.of(UserDto.UserResponse.of(user));
     }
@@ -164,7 +166,7 @@ public class AuthService {
 
         // 3. 유저 존재 확인
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new RestException(ErrorCode.AUTH_USER_NOT_FOUND));
 
         // 4. 비밀번호 암호화 및 업데이트
         user.updatePassword(passwordEncoder.encode(request.getNewPassword()));
@@ -182,7 +184,7 @@ public class AuthService {
     private void validateEmailVerified(String email, EmailPurpose purpose) {
         String isVerified = redisTemplate.opsForValue().get("EMAIL_VERIFIED:" + purpose.name() + ":" + email);
         if (!"TRUE".equals(isVerified)) {
-            throw new RuntimeException("이메일 인증이 완료되지 않았습니다.");
+            throw new RestException(ErrorCode.AUTH_EMAIL_NOT_VERIFIED);
         }
     }
 
