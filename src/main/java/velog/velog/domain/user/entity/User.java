@@ -5,14 +5,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import velog.velog.common.UserBaseEntity;
+import lombok.experimental.SuperBuilder;
+import velog.velog.common.auditor.UserBaseEntity;
 
 @Entity
 @Getter
 @Table(name = "users")
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 public class User extends UserBaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
